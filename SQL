@@ -1,0 +1,212 @@
+1. List all customers
+
+Query :-
+SELECT * FROM Customers;
+
+OUTPUT : - 
++------------+-----------+----------+------------------------+-------------+
+| CustomerID | FirstName | LastName | Email                  | DateOfBirth |
++------------+-----------+----------+------------------------+-------------+
+|          1 | John      | Doe      | john.doe@example.com   | 1985-01-15  |
+|          2 | Jane      | Smith    | jane.smith@example.com | 1990-06-20  |
++------------+-----------+----------+------------------------+-------------+
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+2.Find all orders placed in January 2023.
+
+Query :-
+SELECT o.OrderID, c.FirstName, c.LastName,c.Email, o.OrderDate,p.ProductName,oi.Quantity
+FROM Orders o
+JOIN Customers c ON o.CustomerID = c.CustomerID
+JOIN OrderItems oi ON o.OrderID = oi.OrderID
+JOIN Products p ON oi.ProductID = p.ProductID
+ORDER BY  o.OrderID;
+
+OUTPUT:-
++---------+-----------+----------+------------------------+------------+-------------+----------+
+| OrderID | FirstName | LastName | Email                  | OrderDate  | ProductName | Quantity |
++---------+-----------+----------+------------------------+------------+-------------+----------+
+|       1 | John      | Doe      | john.doe@example.com   | 2023-01-10 | Laptop      |        1 |
+|       1 | John      | Doe      | john.doe@example.com   | 2023-01-10 | Headphones  |        2 |
+|       2 | Jane      | Smith    | jane.smith@example.com | 2023-01-12 | Smartphone  |        1 |
+|       2 | Jane      | Smith    | jane.smith@example.com | 2023-01-12 | Headphones  |        1 |
++---------+-----------+----------+------------------------+------------+-------------+----------+
+
+______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+3. Get the details of each order, including the customer name and email.
+
+Query :-
+
+SELECT Orders.OrderID, Customers.FirstName, Customers.LastName, Customers.Email, Orders.OrderDate,
+       OrderItems.ProductID, Products.ProductName, Products.Price, OrderItems.Quantity
+FROM Orders
+JOIN Customers ON Orders.CustomerID = Customers.CustomerID
+JOIN OrderItems ON Orders.OrderID = OrderItems.OrderID
+JOIN Products ON OrderItems.ProductID = Products.ProductID;
+
+
+OUTPUT : -
++---------+-----------+----------+------------------------+------------+-----------+-------------+---------+----------+
+| OrderID | FirstName | LastName | Email                  | OrderDate  | ProductID | ProductName | Price   | Quantity |
++---------+-----------+----------+------------------------+------------+-----------+-------------+---------+----------+
+|       1 | John      | Doe      | john.doe@example.com   | 2023-01-10 |         1 | Laptop      | 1000.00 |        1 |
+|       1 | John      | Doe      | john.doe@example.com   | 2023-01-10 |         3 | Headphones  |  100.00 |        2 |
+|       2 | Jane      | Smith    | jane.smith@example.com | 2023-01-12 |         2 | Smartphone  |  600.00 |        1 |
+|       2 | Jane      | Smith    | jane.smith@example.com | 2023-01-12 |         3 | Headphones  |  100.00 |        1 |
++---------+-----------+----------+------------------------+------------+-----------+-------------+---------+----------+
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________
+
+4. List the products purchased in a specific order (e.g., OrderID = 1).
+
+Query :-
+
+ SELECT Products.ProductName, Products.Price, OrderItems.Quantity
+    FROM OrderItems
+    JOIN Products ON OrderItems.ProductID = Products.ProductID
+    WHERE OrderItems.OrderID = 1;
+
+OUTPUT:-
++-------------+---------+----------+
+| ProductName | Price   | Quantity |
++-------------+---------+----------+
+| Laptop      | 1000.00 |        1 |
+| Headphones  |  100.00 |        2 |
++-------------+---------+----------+
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+5. Calculate the total amount spent by each customer.
+
+Query :-
+
+SELECT 
+    c.CustomerID,
+    CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    c.Email,
+    SUM(p.Price * oi.Quantity) AS TotalAmountSpent
+FROM 
+    Customers c
+JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+JOIN 
+    OrderItems oi ON o.OrderID = oi.OrderID
+JOIN 
+    Products p ON oi.ProductID = p.ProductID
+GROUP BY 
+    c.CustomerID, c.FirstName, c.LastName, c.Email
+ORDER BY 
+    TotalAmountSpent DESC;
+
+
+OUTPUT :-
+
++------------+--------------+------------------------+------------------+
+| CustomerID | CustomerName | Email                  | TotalAmountSpent |
++------------+--------------+------------------------+------------------+
+|          1 | John Doe     | john.doe@example.com   |          1200.00 |
+|          2 | Jane Smith   | jane.smith@example.com |           700.00 |
++------------+--------------+------------------------+------------------+
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+6. Find the most popular product (the one that has been ordered the most).
+
+Query :-
+
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    COUNT(oi.OrderItemID) AS TotalOrders
+FROM 
+    Products p
+JOIN 
+    OrderItems oi ON p.ProductID = oi.ProductID
+GROUP BY 
+    p.ProductID, p.ProductName
+ORDER BY 
+    TotalOrders DESC
+LIMIT 1;
+
+
+OUTPUT : -
+
++-----------+-------------+-------------+
+| ProductID | ProductName | TotalOrders |
++-----------+-------------+-------------+
+|         3 | Headphones  |           2 |
++-----------+-------------+-------------+
+
+______________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+7. Get the total number of orders and the total sales amount for each month in 2023.
+
+Query :-
+
+SELECT 
+    YEAR(o.OrderDate) AS Year,
+    MONTH(o.OrderDate) AS Month,
+    COUNT(o.OrderID) AS TotalOrders,
+    SUM(p.Price * oi.Quantity) AS TotalSalesAmount
+FROM 
+    Orders o
+JOIN 
+    OrderItems oi ON o.OrderID = oi.OrderID
+JOIN 
+    Products p ON oi.ProductID = p.ProductID
+WHERE 
+    YEAR(o.OrderDate) = 2023
+GROUP BY 
+    YEAR(o.OrderDate), MONTH(o.OrderDate)
+ORDER BY 
+    YEAR(o.OrderDate), MONTH(o.OrderDate);
+
+
+OUTPUT : -
+
++------+-------+-------------+------------------+
+| Year | Month | TotalOrders | TotalSalesAmount |
++------+-------+-------------+------------------+
+| 2023 |     1 |           4 |          1900.00 |
++------+-------+-------------+------------------+
+
+________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+8.Find customers who have spent more than $1000.
+
+Query :-
+
+SELECT 
+    Customers.CustomerID,
+    Customers.FirstName,
+    Customers.LastName,
+    SUM(Products.Price * OrderItems.Quantity) AS TotalSpent
+FROM 
+    Customers
+JOIN 
+    Orders ON Customers.CustomerID = Orders.CustomerID
+JOIN 
+    OrderItems ON Orders.OrderID = OrderItems.OrderID
+JOIN 
+    Products ON OrderItems.ProductID = Products.ProductID
+GROUP BY 
+    Customers.CustomerID,
+    Customers.FirstName,
+    Customers.LastName
+HAVING 
+    TotalSpent > 1000;
+
+OUTPUT :- 
++------------+-----------+----------+------------+
+| CustomerID | FirstName | LastName | TotalSpent |
++------------+-----------+----------+------------+
+|          1 | John      | Doe      |    1200.00 |
++------------+-----------+----------+------------+
+
+
+
+
